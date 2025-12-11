@@ -47,6 +47,29 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@app.get("/debug/check-admin")
+async def check_admin():
+    """Debug endpoint to check admin user (REMOVE IN PRODUCTION)"""
+    from app.db.session import get_db
+    from app.db.models import User
+    
+    db = next(get_db())
+    try:
+        admin = db.query(User).filter(User.username == "admin").first()
+        if admin:
+            return {
+                "admin_exists": True,
+                "username": admin.username,
+                "api_key": admin.api_key,
+                "role": admin.role,
+                "credits": admin.credits
+            }
+        else:
+            return {"admin_exists": False}
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
