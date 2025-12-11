@@ -1,20 +1,84 @@
 # Command Gateway - Backend API
 
-A FastAPI-based command execution gateway with rule-based access control, credit system, and comprehensive audit logging.
+A FastAPI-based command execution gateway with rule-based access control, credit system, comprehensive audit logging, and approval workflow for the Unbound Hackathon.
 
 ## 🎯 Overview
 
-The Command Gateway is a system where administrators configure rules to control which commands can run. Safe commands execute automatically, dangerous commands get blocked, and everything is tracked with a credit system and audit trail.
+The Command Gateway is a secure system where administrators configure rules to control which commands can run. Safe commands execute automatically, dangerous commands get blocked, and sensitive commands require approval. Everything is tracked with a credit system and complete audit trail.
 
-## ✨ Features
+## ✨ Core Features
 
-- **API Key Authentication**: Simple authentication using API keys in request headers
+### Authentication & Authorization
+- **API Key Authentication**: Secure authentication using API keys in X-API-Key header
 - **Role-Based Access Control**: Admin and Member roles with different permissions
+- **Shared API Key**: Easy access for demo and testing (`HnXVX7endKivrmVLnigm6i7RAPwBIGY85yDVSAd96Nec9XsPYIYavqIlC1tORf2I`)
+
+### Command Management
+- **Rule-Based Command Filtering**: Regex-based rules with three actions:
+  - `AUTO_ACCEPT`: Safe commands execute immediately
+  - `AUTO_REJECT`: Dangerous commands blocked instantly
+  - `REQUIRE_APPROVAL`: Sensitive commands need admin review (Bonus Feature)
+- **Priority System**: Rules evaluated by priority (lower number = higher priority)
 - **Command Credit System**: Track and manage user credits for command execution
-- **Rule-Based Command Filtering**: Regex-based rules with AUTO_ACCEPT, AUTO_REJECT, and REQUIRE_APPROVAL actions
 - **Transaction Safety**: All operations (credit deduction, execution, logging) succeed or fail together
-- **Comprehensive Audit Logging**: Complete trail of all actions in the system
-- **RESTful API**: Well-structured endpoints for all operations
+
+### Approval Workflow (Bonus Feature)
+- **Pending Approvals**: Commands requiring approval are queued for admin review
+- **Admin Review**: Admins can approve or reject pending commands
+- **Status Tracking**: Real-time status updates (pending → approved/rejected → executed)
+- **Notifications**: Auto-refresh system notifies users of approval decisions
+
+### Monitoring & Security
+- **Comprehensive Audit Logging**: Complete trail of all actions (commands, rule changes, approvals)
+- **User Statistics**: Track total commands, executed, rejected per user
+- **Rule Conflict Detection** (Bonus Feature): Automatically detects when multiple rules with same pattern have different actions
+- **Conflict Reporting**: GET `/rules/conflicts/check` endpoint shows all rule conflicts
+
+## 🎁 Bonus Features Implemented
+
+1. ✅ **REQUIRE_APPROVAL Action**: Commands can be queued for admin approval instead of auto-execution
+2. ✅ **Approval Notifications**: Real-time notifications when approvals are granted/rejected
+3. ✅ **Rule Conflict Detection**: System detects and reports conflicting rules
+4. ✅ **Deployed to Cloud**: Live on Render at https://comman-gateway-be.onrender.com
+
+## 🏗️ Architecture
+
+### Database Models
+- **User**: Username, API key, role (admin/member), credits
+- **Rule**: Pattern (regex), action, description, priority
+- **Command**: Command text, status, user_id, rule_id, result
+- **AuditLog**: User actions, timestamps, details
+- **ApprovalRequest**: Command approvals, requester, approver, status
+
+### API Endpoints
+
+#### Authentication
+- `GET /users/me` - Get current authenticated user
+- `GET /users/me/stats` - Get user statistics
+
+#### Users (Admin only)
+- `POST /users/` - Create new user
+- `GET /users/` - List all users
+- `PATCH /users/{id}/credits` - Update user credits
+
+#### Rules (Admin only)
+- `POST /rules/` - Create rule (with conflict detection)
+- `GET /rules/` - List all rules
+- `PUT /rules/{id}` - Update rule
+- `DELETE /rules/{id}` - Delete rule
+- `GET /rules/conflicts/check` - Check for rule conflicts (Bonus)
+
+#### Commands
+- `POST /commands/` - Submit command (evaluates rules, may queue for approval)
+- `GET /commands/` - List all commands (admin) or user commands
+
+#### Approvals (Bonus Feature)
+- `GET /approvals/` - List pending approval requests
+- `POST /approvals/{id}/review` - Approve or reject command
+
+#### Audit
+- `GET /audit/` - Get audit logs
+- `GET /audit/user/{id}` - Get logs for specific user
 
 ## 🚀 Quick Start
 
