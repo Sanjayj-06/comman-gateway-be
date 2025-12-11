@@ -5,8 +5,7 @@ Run this ONCE on Render to fix the API key issue.
 """
 import os
 from app.db.base import Base
-from app.db.session import engine
-from app.db.session import get_db
+from app.db.session import engine, SessionLocal
 from app.seed import seed_database
 
 def reset_database():
@@ -22,7 +21,7 @@ def reset_database():
     print("✓ Created all tables")
     
     # Seed database
-    db = next(get_db())
+    db = SessionLocal()
     try:
         seed_database(db)
         print("\n✅ Database reset complete!")
