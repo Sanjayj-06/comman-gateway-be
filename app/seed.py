@@ -18,7 +18,8 @@ def seed_database(db: Session):
         print(f"  API Key: {admin.api_key}")
     else:
         
-        admin_api_key = generate_api_key()
+        # Use hardcoded API key for easy access
+        admin_api_key = "HnXVX7endKivrmVLnigm6i7RAPwBIGY85yDVSAd96Nec9XsPYIYavqIlC1tORf2I"
         admin = User(
             username="admin",
             api_key=admin_api_key,
